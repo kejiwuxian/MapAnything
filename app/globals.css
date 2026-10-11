@@ -165,3 +165,50 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 560px) {
   .topbar { height: auto; flex-wrap: wrap; gap: 15px; padding: 17px 0; }.brand small { display: none; }.topbar nav { order: 3; width: 100%; }.topbar nav a { flex: 1; text-align: center; }.hero-row h1, .fleet-header h1 { font-size: 49px; }.hero-actions { align-items: start; flex-direction: column; }.pipeline { flex-wrap: wrap; }.site-footer { flex-direction: column; }.cluster-legend { padding-top: 0; }.map-provider { width: 100%; margin-left: 0; }.operator-header { flex-direction: column; }
 }
+
+/* Stable interaction geometry: state changes paint inside reserved boxes. */
+.primary-button { min-width: 205px; }
+.hero-metric strong { min-width: 104px; }
+.pipeline span { min-width: 58px; padding-left: 16px; }
+.pipeline span::before { content: ""; position: absolute; left: 0; top: 0; width: 12px; }
+.pipeline span.done::before { content: "✓"; margin-right: 0; }
+.cluster-section::after { content: ""; display: block; height: 76px; margin-top: 16px; }
+.cluster-section:has(.mapping-insight)::after { display: none; }
+.mapping-insight { min-height: 76px; }
+.fallback-truck.is-active { transform: translate(-50%, -50%) scale(1.4); }
+
+/* Stage layout tuned for a 16:9 4K capture surface. */
+@media (min-width: 2560px) and (min-aspect-ratio: 16/9) {
+  .page-shell { padding: 0 clamp(80px, 7vw, 280px) 52px; }
+  .topbar { height: 96px; }
+  .brand { font-size: 14px; }
+  .brand-mark { width: 34px; height: 34px; font-size: 18px; }
+  .topbar nav a { padding: 11px 20px; font-size: 13px; }
+  .hero-row { gap: 80px; padding: 100px 0 86px; }
+  .hero-row h1, .fleet-header h1 { max-width: 1080px; font-size: clamp(80px, 4.2vw, 112px); }
+  .hero-copy { max-width: 780px; font-size: 20px; }
+  .hero-actions { gap: 24px; margin-top: 42px; }
+  .primary-button { min-width: 250px; min-height: 56px; border-radius: 13px; font-size: 14px; }
+  .micro-copy { font-size: 13px; }
+  .hero-metric { min-width: 230px; padding: 26px 30px; }
+  .hero-metric strong { min-width: 136px; font-size: 82px; }
+  .workspace-card, .cluster-section { padding: 48px; border-radius: 25px; }
+  .section-heading h2 { font-size: 28px; }
+  .section-heading p { font-size: 15px; }
+  .dataset-row { gap: 24px; margin-top: 42px; }
+  .dataset-card { min-height: 270px; padding: 30px; }
+  .dataset-card h3 { font-size: 22px; }
+  .dataset-card p { font-size: 14px; }
+  .data-tags span, .upload-button { font-size: 12px; }
+  .cluster-grid { grid-template-columns: minmax(0, 1fr) 88px minmax(0, 1fr); gap: 22px; margin-top: 36px; }
+  .cluster-canvas-wrap { max-width: 720px; }
+  .panel-label { padding: 21px 24px 0; font-size: 12px; }
+  .panel-label strong { font-size: 15px; }
+  .panel-foot { padding: 15px 24px 18px; font-size: 12px; }
+  .fleet-header { padding: 76px 0 36px; }
+  .fleet-header p { font-size: 17px; }
+  .fleet-layout { min-height: 820px; gap: 24px; }
+  .map-column { min-height: 820px; }
+  .fleet-map { min-height: 760px; }
+  .fleet-sidebar { padding: 28px; }
+}

@@ -28,7 +28,7 @@ The repository intentionally includes a deterministic explanation and SVG map fa
 ## What works today
 
 - Application-independent Core UI with generic dataset language.
-- Deterministic demo embeddings/clusters and cross-dataset mapping data derived from the complete KIT RADAR archive metadata: 81 source logs, 2,693,824 readings, and 10 OBD-II channels.
+- Runtime normalized K-means clustering over all 81 KIT RADAR log summaries, with 2,693,824 source readings and 10 OBD-II channels represented in the cluster counts and point clouds.
 - Rotating projected 3D vector cluster canvases with hover cross-highlighting.
 - Fleet map with Google Maps loading, dark styling, real Google DirectionsService routes generated from each source route, Places/Directions-ready rerouting, and a local visual fallback.
 - Off-stage event channel for live anomaly injection.

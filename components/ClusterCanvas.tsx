@@ -71,7 +71,8 @@ export default function ClusterCanvas({ clusters, hoveredId, onHover }: Props) {
       const angle = rotationRef.current;
       for (const cluster of clusters) {
         const [cx, cy, cz] = cluster.position;
-        const pointCount = Math.min(220, Math.max(84, Math.round(Math.sqrt(cluster.count) * 4)));
+        const sourcePoints = cluster.points?.length ? cluster.points : [cluster.position];
+        const pointCount = cluster.points?.length ? sourcePoints.length * 5 : Math.min(220, Math.max(84, Math.round(Math.sqrt(cluster.count) * 4)));
         let centroidX = 0;
         let centroidY = 0;
         const active = hoveredId === cluster.id;
@@ -79,14 +80,15 @@ export default function ClusterCanvas({ clusters, hoveredId, onHover }: Props) {
 
         for (let index = 0; index < pointCount; index += 1) {
           const seed = hashSeed(cluster.id) + index * 97;
+          const sourcePoint = cluster.points?.length ? sourcePoints[Math.floor(index / 5)] : [cx, cy, cz];
           const theta = pseudo(seed) * Math.PI * 2;
-          const radius = Math.sqrt(pseudo(seed + 11)) * 0.3;
+          const radius = cluster.points?.length ? Math.sqrt(pseudo(seed + 11)) * 0.045 : Math.sqrt(pseudo(seed + 11)) * 0.3;
           const localX = Math.cos(theta) * radius * (0.75 + pseudo(seed + 23) * 0.35);
           const localY = Math.sin(theta) * radius * (0.75 + pseudo(seed + 37) * 0.35);
-          const localZ = (pseudo(seed + 53) - 0.5) * 0.22;
-          const x = cx + localX;
-          const y = cy + localY;
-          const z = cz + localZ;
+          const localZ = cluster.points?.length ? (pseudo(seed + 53) - 0.5) * 0.05 : (pseudo(seed + 53) - 0.5) * 0.22;
+          const x = sourcePoint[0] + localX;
+          const y = sourcePoint[1] + localY;
+          const z = sourcePoint[2] + localZ;
           const rotatedX = x * Math.cos(angle) - z * Math.sin(angle);
           const rotatedZ = x * Math.sin(angle) + z * Math.cos(angle);
           const scale = 1 / (1.6 - rotatedZ * 0.28);

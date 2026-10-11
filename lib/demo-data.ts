@@ -1,4 +1,5 @@
-import { kitRadarClusterCounts, kitRadarDataset } from "./kit-radar-data";
+import { kitRadarDataset } from "./kit-radar-data";
+import { clusterKitRadarLogs } from "./cluster-model";
 
 export type PageKey = "core" | "fleet";
 
@@ -10,6 +11,7 @@ export type Cluster = {
   position: [number, number, number];
   color: string;
   features: string[];
+  points?: [number, number, number][];
 };
 
 export type Mapping = {
@@ -55,13 +57,7 @@ export type AnomalyEvent = {
   source: string;
 };
 
-export const telemetryClusters: Cluster[] = [
-  { id: "A-01", label: "Thermal load", count: kitRadarClusterCounts[0], confidence: 0.94, position: [-0.75, 0.46, 0.2], color: "#52e6b5", features: ["coolant temp", "airflow", "ambient temp"] },
-  { id: "A-02", label: "Steady cruise", count: kitRadarClusterCounts[1], confidence: 0.91, position: [0.42, 0.12, -0.2], color: "#6d8cff", features: ["speed", "RPM", "throttle"] },
-  { id: "A-03", label: "Urban load", count: kitRadarClusterCounts[2], confidence: 0.88, position: [0.65, -0.56, 0.38], color: "#b18cff", features: ["RPM", "speed", "intake pressure"] },
-  { id: "A-04", label: "Airflow drift", count: kitRadarClusterCounts[3], confidence: 0.83, position: [-0.14, 0.68, -0.55], color: "#ffb86b", features: ["airflow", "intake temp", "throttle"] },
-  { id: "A-05", label: "Idle / stop", count: kitRadarClusterCounts[4], confidence: 0.79, position: [-0.52, -0.46, -0.4], color: "#f27fa3", features: ["RPM", "speed", "throttle"] },
-];
+export const telemetryClusters: Cluster[] = clusterKitRadarLogs();
 
 export const reportClusters: Cluster[] = [
   { id: "B-01", label: "Cooling system", count: 31, confidence: 0.91, position: [-0.62, 0.34, 0.28], color: "#52e6b5", features: ["coolant", "radiator", "fan inspection"] },
