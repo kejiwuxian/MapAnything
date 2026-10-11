@@ -1,4 +1,5 @@
 @import "./presentation/presentation.css";
+@import "./teleprompter/teleprompter.css";
 
 :root {
   --ink: #e9f0fb;
