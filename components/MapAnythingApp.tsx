@@ -7,8 +7,16 @@ import CorePageLive from "./CorePage";
 import FleetMap from "./FleetMap";
 import { anomalyProfiles, baseTrucks, fleetSourceDataset, mappings, reportClusters, telemetryClusters, workshops, type AnomalyEvent, type AnomalyType, type PageKey, type Truck } from "../lib/demo-data";
 
+function stageHref(fallback: number) {
+  if (typeof window === "undefined") return `/presentation?slide=${fallback}`;
+  const queryValue = new URLSearchParams(window.location.search).get("stage");
+  const value = queryValue === null ? fallback : Number(queryValue);
+  const slide = Number.isInteger(value) ? value : fallback;
+  return `/presentation?slide=${Math.max(0, Math.min(7, slide))}`;
+}
+
 function Header({ page }: { page: PageKey }) {
-  return <header className="topbar"><Link href="/" className="brand"><span className="brand-mark">M</span><span>MAPANYTHING</span><small>STARTUP DATA LAYER</small></Link><Link href="/presentation" className="back-to-slides">← Back to slides</Link><nav><Link className={page === "core" ? "active" : ""} href="/">Core Platform</Link><Link className={page === "fleet" ? "active" : ""} href="/fleet">Fleet Agent</Link></nav><div className="live-pill"><span className="pulse-dot" /> Live workspace</div></header>;
+  return <header className="topbar"><Link href="/" className="brand"><span className="brand-mark">M</span><span>MAPANYTHING</span><small>STARTUP DATA LAYER</small></Link><Link href={stageHref(page === "fleet" ? 5 : 2)} className="back-to-slides">Stage Mode · Next →</Link><nav><Link className={page === "core" ? "active" : ""} href="/">Core Platform</Link><Link className={page === "fleet" ? "active" : ""} href="/fleet">Fleet Agent</Link></nav><div className="live-pill"><span className="pulse-dot" /> Live workspace</div></header>;
 }
 
 function StatusBadge({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "success" | "warning" | "danger" }) { return <span className={`status-badge ${tone}`}>{children}</span>; }

@@ -95,18 +95,38 @@ const slides: Slide[] = [
   },
 ];
 
-function goWithTransition(router: ReturnType<typeof useRouter>, path: string) {
+function readSlideParam(max: number) {
+  if (typeof window === "undefined") return 0;
+  const value = Number(new URLSearchParams(window.location.search).get("slide"));
+  return Number.isInteger(value) ? Math.max(0, Math.min(max - 1, value)) : 0;
+}
+
+function goWithTransition(router: ReturnType<typeof useRouter>, path: string, nextSlide?: number) {
+  const target = nextSlide === undefined ? path : `${path}${path.includes("?") ? "&" : "?"}stage=${nextSlide}`;
   const documentWithTransition = document as Document & { startViewTransition?: (callback: () => void) => void };
-  if (documentWithTransition.startViewTransition) documentWithTransition.startViewTransition(() => router.push(path));
-  else router.push(path);
+  if (documentWithTransition.startViewTransition) documentWithTransition.startViewTransition(() => router.push(target));
+  else router.push(target);
 }
 
 export default function PresentationMode() {
   const router = useRouter();
   const [active, setActive] = useState(0);
+  const [hydrated, setHydrated] = useState(false);
   const [showCue, setShowCue] = useState(true);
   const slide = slides[active];
   const progress = useMemo(() => `${((active + 1) / slides.length) * 100}%`, [active]);
+
+  useEffect(() => {
+    setActive(readSlideParam(slides.length));
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set("slide", String(active));
+    window.history.replaceState(null, "", `${url.pathname}?${url.searchParams.toString()}`);
+  }, [active, hydrated]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -118,5 +138,5 @@ export default function PresentationMode() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  return <main className="presentation-page" style={{ "--slide-accent": slide.accent } as React.CSSProperties}><div className="presentation-topbar"><Link href="/" className="presentation-brand"><span className="brand-mark">M</span> MAPANYTHING <small>STAGE MODE</small></Link><div className="presentation-progress"><span>{String(active + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}</span><div><i style={{ width: progress }} /></div><span>4:00</span></div><button className="notes-toggle" onClick={() => setShowCue((value) => !value)}>{showCue ? "Hide notes" : "Show notes"} <kbd>N</kbd></button></div><section className="presentation-stage"><div className="stage-orbit orbit-one" /><div className="stage-orbit orbit-two" /><div className="stage-copy"><div className="slide-kicker">{slide.kicker}</div><h1 key={active}>{slide.title}</h1><p key={`body-${active}`}>{slide.body}</p><div className="proof-row">{slide.proof?.map((item) => <span key={item}><i style={{ background: slide.accent }} />{item}</span>)}</div><div className="stage-actions">{slide.action && <button className="stage-button" onClick={() => goWithTransition(router, slide.action!.path)}>{slide.action.label}<span>↗</span></button>}<button className="ghost-button" onClick={() => setActive((value) => Math.max(0, value - 1))} disabled={active === 0}>←</button><button className="ghost-button" onClick={() => setActive((value) => Math.min(slides.length - 1, value + 1))} disabled={active === slides.length - 1}>→</button></div></div><div className="stage-visual" aria-hidden="true"><div className="visual-radar"><span className="radar-ring ring-a" /><span className="radar-ring ring-b" /><span className="radar-ring ring-c" /><span className="radar-sweep" />{[0, 1, 2, 3, 4, 5].map((dot) => <i key={dot} className={`radar-dot dot-${dot}`} style={{ background: slide.accent }} />)}</div><div className="visual-card visual-card-top"><small>{active === 6 ? "LIVE EVENT" : active === 3 ? "HEALTHCARE" : "MAPANYTHING CORE"}</small><strong>{active === 6 ? "TX-204 / anomaly" : active === 3 ? "wearable → reports" : active < 4 ? "cross-domain map" : "agent-ready output"}</strong></div><div className="visual-card visual-card-bottom"><span style={{ background: slide.accent }} />{active === 6 ? "Targeted reroute · 87%" : active === 3 ? "Inspection focus · 82%" : active === 7 ? "Reusable mapping layer" : "No shared timestamp required"}</div></div></section>{showCue && <aside className="speaker-cue"><span>SPEAKER CUE · {slide.time}</span><p>“{slide.cue}”</p></aside>}<footer className="presentation-footer"><span>Arrow keys / space to advance</span><span>Live demo pages are part of the app</span><span>SpeedHacks · SR008</span></footer></main>;
+  return <main className="presentation-page" style={{ "--slide-accent": slide.accent } as React.CSSProperties}><div className="presentation-topbar"><Link href="/" className="presentation-brand"><span className="brand-mark">M</span> MAPANYTHING <small>STAGE MODE</small></Link><div className="presentation-progress"><span>{String(active + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}</span><div><i style={{ width: progress }} /></div><span>4:00</span></div><button className="notes-toggle" onClick={() => setShowCue((value) => !value)}>{showCue ? "Hide notes" : "Show notes"} <kbd>N</kbd></button></div><section className="presentation-stage"><div className="stage-orbit orbit-one" /><div className="stage-orbit orbit-two" /><div className="stage-copy"><div className="slide-kicker">{slide.kicker}</div><h1 key={active}>{slide.title}</h1><p key={`body-${active}`}>{slide.body}</p><div className="proof-row">{slide.proof?.map((item) => <span key={item}><i style={{ background: slide.accent }} />{item}</span>)}</div><div className="stage-actions">{slide.action && <button className="stage-button" onClick={() => goWithTransition(router, slide.action!.path, Math.min(slides.length - 1, active + 1))}>{slide.action.label}<span>↗</span></button>}<button className="ghost-button" onClick={() => setActive((value) => Math.max(0, value - 1))} disabled={active === 0}>←</button><button className="ghost-button" onClick={() => setActive((value) => Math.min(slides.length - 1, value + 1))} disabled={active === slides.length - 1}>→</button></div></div><div className="stage-visual" aria-hidden="true"><div className="visual-radar"><span className="radar-ring ring-a" /><span className="radar-ring ring-b" /><span className="radar-ring ring-c" /><span className="radar-sweep" />{[0, 1, 2, 3, 4, 5].map((dot) => <i key={dot} className={`radar-dot dot-${dot}`} style={{ background: slide.accent }} />)}</div><div className="visual-card visual-card-top"><small>{active === 6 ? "LIVE EVENT" : active === 3 ? "HEALTHCARE" : "MAPANYTHING CORE"}</small><strong>{active === 6 ? "TX-204 / anomaly" : active === 3 ? "wearable → reports" : active < 4 ? "cross-domain map" : "agent-ready output"}</strong></div><div className="visual-card visual-card-bottom"><span style={{ background: slide.accent }} />{active === 6 ? "Targeted reroute · 87%" : active === 3 ? "Inspection focus · 82%" : active === 7 ? "Reusable mapping layer" : "No shared timestamp required"}</div></div></section>{showCue && <aside className="speaker-cue"><span>SPEAKER CUE · {slide.time}</span><p>“{slide.cue}”</p></aside>}<footer className="presentation-footer"><span>Arrow keys / space to advance</span><span>Live demo pages are part of the app</span><span>SpeedHacks · SR008</span></footer></main>;
 }

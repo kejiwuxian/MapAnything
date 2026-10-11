@@ -8,7 +8,10 @@ import { clusterKitRadarLogs } from "../lib/cluster-model";
 import { mappings, reportClusters, telemetryClusters } from "../lib/demo-data";
 
 function CoreHeader() {
-  return <header className="topbar"><Link href="/" className="brand"><span className="brand-mark">M</span><span>MAPANYTHING</span><small>STARTUP DATA LAYER</small></Link><Link href="/presentation" className="back-to-slides">← Back to slides</Link><nav><Link className="active" href="/">Core Platform</Link><Link href="/fleet">Fleet Agent</Link></nav><div className="live-pill"><span className="pulse-dot" /> Live workspace</div></header>;
+  const queryValue = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("stage");
+  const value = queryValue === null ? 2 : Number(queryValue);
+  const slide = Number.isInteger(value) ? Math.max(0, Math.min(7, value)) : 2;
+  return <header className="topbar"><Link href="/" className="brand"><span className="brand-mark">M</span><span>MAPANYTHING</span><small>STARTUP DATA LAYER</small></Link><Link href={`/presentation?slide=${slide}`} className="back-to-slides">Stage Mode · Next →</Link><nav><Link className="active" href="/">Core Platform</Link><Link href="/fleet">Fleet Agent</Link></nav><div className="live-pill"><span className="pulse-dot" /> Live workspace</div></header>;
 }
 
 function Badge({ children }: { children: React.ReactNode }) {
