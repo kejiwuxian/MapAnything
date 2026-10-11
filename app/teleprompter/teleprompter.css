@@ -16,6 +16,7 @@
 .teleprompter-progress { margin-bottom: 7px; }
 .teleprompter-event-state { padding-bottom: 7px; font-size: 8px !important; }
 .teleprompter-layout { height: 350px; margin-top: 18px; gap: 14px; }
+.teleprompter-layout:has(.teleprompter-current:only-child) { display: block; }
 .teleprompter-current { min-height: 0; overflow: hidden; padding: 24px 28px; }
 .teleprompter-line { display: -webkit-box; overflow: hidden; margin: 17px 0 19px; font-size: clamp(22px, 2.35vw, 34px); line-height: 1.05; -webkit-box-orient: vertical; -webkit-line-clamp: 4; }
 .teleprompter-instruction { padding: 10px 13px; }

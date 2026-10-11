@@ -94,7 +94,7 @@ export default function Teleprompter() {
           <section className="teleprompter-current">
             <div className="teleprompter-kicker">{activeSegment.kicker}</div>
             <p className="teleprompter-line">{activeSegment.line}</p>
-            <div className="teleprompter-instruction"><span>INSTRUCTION</span><p>{activeSegment.instruction}</p></div>
+            <div className="teleprompter-instruction"><span>WHERE TO CLICK / DO</span><p>{activeSegment.instruction}</p></div>
             <div className="teleprompter-controls">
               <button className="teleprompter-start" onClick={start}>{startedAt === null ? (elapsed >= TELEPROMPTER_TOTAL_SECONDS ? "Restart teleprompter" : "Start teleprompter") : "Resume teleprompter"}<b>▶</b></button>
               {startedAt !== null && <button className="teleprompter-secondary" onClick={() => setStartedAt(null)}>Pause</button>}
@@ -102,10 +102,6 @@ export default function Teleprompter() {
             </div>
           </section>
 
-          <aside className="teleprompter-script-list" aria-label="Presentation script">
-            <div className="teleprompter-list-header"><span>RUN OF SHOW</span><small>Auto-advance follows timer</small></div>
-            {teleprompterScript.map((segment, index) => <div key={segment.id} className={`teleprompter-script-row ${index === activeIndex ? "active" : ""} ${elapsed >= segment.end ? "complete" : ""}`}><span>{String(segment.id).padStart(2, "0")}</span><div><strong>{segment.kicker.split(" · ")[1]}</strong><p>{segment.line}</p><small>{segment.instruction}</small></div><time>{formatClock(segment.start)}</time></div>)}
-          </aside>
         </div>
       </section>
       <footer className="teleprompter-footer"><span>Direct URL only · /teleprompter</span><span>At 02:40: automatic TX-204 cooling anomaly injection</span></footer>
