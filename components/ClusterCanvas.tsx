@@ -26,8 +26,6 @@ export default function ClusterCanvas({ clusters, hoveredId, onHover }: Props) {
       const height = parent.clientHeight;
       canvas.width = width * ratio;
       canvas.height = height * ratio;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
       context.clearRect(0, 0, width, height);
       context.fillStyle = "#08101d";
