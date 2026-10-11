@@ -5,6 +5,17 @@ import type { Truck, Workshop } from "../lib/demo-data";
 
 type Props = { trucks: Truck[]; workshops: Workshop[]; selectedTruckId: string; anomalyTruckId: string | null; onSelectTruck: (id: string) => void };
 type TruckMapObjects = { line: any; marker: any };
+type RoutePoint = { lat: number; lng: number };
+
+async function fetchRoadRoute(route: RoutePoint[], signal: AbortSignal): Promise<RoutePoint[] | null> {
+  const coordinates = route.map((point) => `${point.lng},${point.lat}`).join(";");
+  const response = await fetch(`https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson&steps=false`, { signal });
+  if (!response.ok) return null;
+  const payload = await response.json() as { code?: string; routes?: { geometry?: { coordinates?: [number, number][] } }[] };
+  const coordinatesFromRoute = payload.routes?.[0]?.geometry?.coordinates;
+  if (payload.code !== "Ok" || !coordinatesFromRoute?.length) return null;
+  return coordinatesFromRoute.map(([lng, lat]) => ({ lat, lng }));
+}
 
 function loadGoogleMaps(apiKey: string) {
   return new Promise<void>((resolve, reject) => {
@@ -30,10 +41,13 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
   const mapRef = useRef<HTMLDivElement | null>(null);
   const objectsRef = useRef<any[]>([]);
   const truckObjectsRef = useRef<Record<string, TruckMapObjects>>({});
-  const routePathsRef = useRef<Record<string, { lat: number; lng: number }[]>>({});
+  const routePathsRef = useRef<Record<string, RoutePoint[]>>({});
   const hoverClearTimerRef = useRef<number | null>(null);
   const [mapMode, setMapMode] = useState<"google" | "fallback">("fallback");
   const [hoveredTruckId, setHoveredTruckId] = useState<string | null>(null);
+  const [roadRoutes, setRoadRoutes] = useState<Record<string, RoutePoint[]>>({});
+  const [roadRouteStatus, setRoadRouteStatus] = useState<"loading" | "ready" | "unavailable">("loading");
+  const routeSignature = trucks.map((truck) => `${truck.id}:${truck.route.map((point) => `${point.lat},${point.lng}`).join(";")}`).join("|");
 
   const hoverTruck = (id: string) => {
     if (hoverClearTimerRef.current !== null) window.clearTimeout(hoverClearTimerRef.current);
@@ -66,6 +80,30 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
     setHoveredTruckId(null);
   }, [trucks, anomalyTruckId]);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    let cancelled = false;
+    setRoadRoutes({});
+    setRoadRouteStatus("loading");
+    Promise.all(trucks.map(async (truck) => [truck.id, await fetchRoadRoute(truck.route, controller.signal)] as const))
+      .then((results) => {
+        if (cancelled) return;
+        const nextRoutes: Record<string, RoutePoint[]> = {};
+        results.forEach(([id, path]) => {
+          if (path) nextRoutes[id] = path;
+        });
+        setRoadRoutes(nextRoutes);
+        setRoadRouteStatus(Object.keys(nextRoutes).length === trucks.length ? "ready" : "unavailable");
+      })
+      .catch(() => {
+        if (!cancelled) setRoadRouteStatus("unavailable");
+      });
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [routeSignature]);
+
   useEffect(() => () => {
     if (hoverClearTimerRef.current !== null) window.clearTimeout(hoverClearTimerRef.current);
   }, []);
@@ -92,10 +130,15 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
       ],
     });
 
+    const bounds = new googleMaps.maps.LatLngBounds();
+    trucks.forEach((truck) => truck.route.forEach((point) => bounds.extend(point)));
+    workshops.forEach((workshop) => bounds.extend(workshop.position));
+    map.fitBounds(bounds, 42);
+
     for (const truck of trucks) {
       const abnormal = truck.id === anomalyTruckId;
       const line = new googleMaps.maps.Polyline({
-        path: routePathsRef.current[truck.id] ?? truck.route,
+        path: routePathsRef.current[truck.id] ?? roadRoutes[truck.id] ?? [],
         geodesic: true,
         strokeColor: abnormal ? "#ff647c" : truck.accent,
         strokeOpacity: abnormal ? 0.92 : 0.82,
@@ -108,7 +151,7 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
       objectsRef.current.push(line);
 
       const marker = new googleMaps.maps.Marker({
-        position: (routePathsRef.current[truck.id] ?? truck.route)[(routePathsRef.current[truck.id] ?? truck.route).length - 1],
+        position: (roadRoutes[truck.id] ?? truck.route)[(roadRoutes[truck.id] ?? truck.route).length - 1],
         map,
         title: truck.id,
         label: { text: "▴", color: abnormal ? "#ff647c" : truck.accent, fontSize: "19px" },
@@ -127,7 +170,6 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
       routeService.route({
         origin: truck.route[0],
         destination: truck.route[truck.route.length - 1],
-        waypoints: truck.route.slice(1, -1).map((point) => ({ location: point, stopover: false })),
         travelMode: googleMaps.maps.TravelMode.DRIVING,
         provideRouteAlternatives: false,
       }, (result: any, status: string) => {
@@ -157,11 +199,22 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
       if (anomalyTruck && workshop) {
         const renderer = new googleMaps.maps.DirectionsRenderer({ suppressMarkers: true, polylineOptions: { strokeColor: "#ffb86b", strokeOpacity: 0.95, strokeWeight: 4, icons: [{ icon: { path: "M 0,-1 0,1", strokeOpacity: 1, scale: 3 }, offset: "0", repeat: "14px" }] } });
         renderer.setMap(map);
+        const fallbackReroute = new googleMaps.maps.Polyline({ path: [], geodesic: true, strokeColor: "#ffb86b", strokeOpacity: 0.95, strokeWeight: 4, map });
         const service = new googleMaps.maps.DirectionsService();
-        service.route({ origin: anomalyTruck.route[anomalyTruck.route.length - 1], destination: workshop.position, travelMode: googleMaps.maps.TravelMode.DRIVING }, (result: any, status: string) => {
-          if (status === "OK" && result) renderer.setDirections(result);
+        const rerouteOrigin = anomalyTruck.route[anomalyTruck.route.length - 1];
+        service.route({ origin: rerouteOrigin, destination: workshop.position, travelMode: googleMaps.maps.TravelMode.DRIVING }, (result: any, status: string) => {
+          if (status === "OK" && result) {
+            fallbackReroute.setMap(null);
+            renderer.setDirections(result);
+            return;
+          }
+          fetchRoadRoute([rerouteOrigin, workshop.position], new AbortController().signal)
+            .then((path) => {
+              if (path?.length) fallbackReroute.setPath(path);
+            })
+            .catch(() => undefined);
         });
-        objectsRef.current.push(renderer);
+        objectsRef.current.push(renderer, fallbackReroute);
       }
     }
 
@@ -172,7 +225,7 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
       truckObjectsRef.current = {};
       routePathsRef.current = {};
     };
-  }, [mapMode, trucks, workshops, selectedTruckId, anomalyTruckId, onSelectTruck]);
+  }, [mapMode, trucks, workshops, selectedTruckId, anomalyTruckId, onSelectTruck, roadRoutes]);
 
   useEffect(() => {
     const hasHover = Boolean(hoveredTruckId);
@@ -193,7 +246,8 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
 
   if (mapMode === "google") return <div ref={mapRef} className="fleet-map" aria-label="Google Maps fleet map" />;
 
-  const routePoints = trucks.flatMap((truck) => truck.route);
+  const routeForTruck = (truck: Truck) => roadRoutes[truck.id] ?? truck.route;
+  const routePoints = trucks.flatMap((truck) => routeForTruck(truck));
   const minLat = Math.min(...routePoints.map((point) => point.lat), ...workshops.map((workshop) => workshop.position.lat));
   const maxLat = Math.max(...routePoints.map((point) => point.lat), ...workshops.map((workshop) => workshop.position.lat));
   const minLng = Math.min(...routePoints.map((point) => point.lng), ...workshops.map((workshop) => workshop.position.lng));
@@ -204,14 +258,11 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
   return (
     <div ref={mapRef} className="fleet-map fallback-map" aria-label="Fleet map fallback">
       <div className="map-grid" />
-      <div className="map-road road-a" />
-      <div className="map-road road-b" />
-      <div className="map-road road-c" />
       <svg className="fallback-routes" viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="Fleet routes">
         {trucks.map((truck) => {
           const abnormal = truck.id === anomalyTruckId;
           const hovered = truck.id === hoveredTruckId;
-          const points = truck.route.map((point) => {
+          const points = routeForTruck(truck).map((point) => {
             const projected = project(point);
             return `${projected.x},${projected.y}`;
           }).join(" ");
@@ -221,14 +272,15 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
       {trucks.map((truck) => {
         const abnormal = truck.id === anomalyTruckId;
         const hovered = truck.id === hoveredTruckId;
-        const endpoint = project(truck.route[truck.route.length - 1]);
+        const route = routeForTruck(truck);
+        const endpoint = project(route[route.length - 1]);
         return <button key={truck.id} className={`fallback-truck ${hasHover && hovered ? "is-hovered" : ""} ${hasHover && !hovered ? "is-dimmed" : ""} ${abnormal ? "is-abnormal" : ""}`} style={{ left: `${endpoint.x}%`, top: `${endpoint.y}%`, color: abnormal ? "#ff647c" : truck.accent }} onMouseEnter={() => hoverTruck(truck.id)} onMouseLeave={clearHoveredTruck} onClick={() => onSelectTruck(truck.id)} title={truck.id}>▴<span>{truck.id}</span></button>;
       })}
       {workshops.map((workshop) => {
         const position = project(workshop.position);
         return <div key={workshop.id} className="fallback-workshop" style={{ left: `${position.x}%`, top: `${position.y}%` }} title={workshop.name}>✚</div>;
       })}
-      <div className="map-fallback-note">Google Maps API loading / demo fallback</div>
+      <div className="map-fallback-note">{roadRouteStatus === "ready" ? "OSRM road geometry · real streets" : roadRouteStatus === "loading" ? "Requesting road geometry…" : "Road routing unavailable · source path shown"}</div>
     </div>
   );
 }
