@@ -100,6 +100,38 @@ a { color: inherit; text-decoration: none; }
 .expansion-strip { display: flex; justify-content: space-between; gap: 28px; align-items: center; margin-top: 18px; padding: 27px 32px; border: 1px solid rgba(86, 119, 176, .21); border-radius: 18px; background: linear-gradient(100deg, #e5edff, #eef5ff); }.expansion-strip h2 { margin: 8px 0 8px; color: #1b3153; font-size: 20px; letter-spacing: -.04em; }.expansion-strip p { margin: 0; color: #62718a; font-size: 11px; }.expansion-strip p b { margin: 0 5px; color: var(--blue); }.healthcare-alert { display: flex; align-items: center; gap: 11px; min-width: 370px; padding: 15px; border: 1px solid rgba(99, 125, 190, .18); border-radius: 11px; background: rgba(255, 255, 255, .63); }.alert-pulse { width: 9px; height: 9px; flex: 0 0 auto; border-radius: 50%; background: var(--violet); box-shadow: 0 0 0 5px rgba(177, 140, 255, .13); }.healthcare-alert div { display: flex; flex-direction: column; gap: 4px; }.healthcare-alert small { color: #7866b7; font-size: 8px; }.healthcare-alert strong { color: #283f68; font-size: 11px; }.healthcare-alert span:not(.alert-pulse):not(.confidence) { color: #73839d; font-size: 10px; }.confidence { margin-left: auto; color: #6659a1; font-size: 14px; font-weight: 800; }
 .site-footer { display: flex; justify-content: space-between; gap: 20px; padding: 21px 2px 0; color: #8997ab; font-size: 9px; }.dark-page .site-footer { color: #5d7194; }
 
+/* Core uses the same dark product language as Fleet and Stage Mode. */
+.page-shell:not(.dark-page) { color: var(--ink); background: radial-gradient(circle at 80% 0%, rgba(62, 110, 180, .17), transparent 33%), #07101d; }
+.page-shell:not(.dark-page) .topbar { border-color: rgba(145, 170, 214, .13); }
+.page-shell:not(.dark-page) .brand { color: #ecf4ff; }
+.page-shell:not(.dark-page) .brand small { color: #627696; }
+.page-shell:not(.dark-page) .topbar nav { border-color: rgba(145, 170, 214, .15); background: rgba(255, 255, 255, .035); }
+.page-shell:not(.dark-page) .topbar nav a.active { color: #e8f4ff; background: rgba(115, 143, 198, .17); box-shadow: none; }
+.page-shell:not(.dark-page) .hero-row h1 { color: #edf4ff; }
+.page-shell:not(.dark-page) .hero-row h1 em { color: var(--mint); }
+.page-shell:not(.dark-page) .hero-copy { color: #9eafc9; }
+.page-shell:not(.dark-page) .micro-copy, .page-shell:not(.dark-page) .metric-foot { color: #7184a5; }
+.page-shell:not(.dark-page) .hero-metric { border-color: rgba(145, 170, 214, .13); }
+.page-shell:not(.dark-page) .hero-metric strong { color: #edf4ff; }
+.page-shell:not(.dark-page) .workspace-card, .page-shell:not(.dark-page) .cluster-section { border-color: rgba(145, 170, 214, .15); background: rgba(11, 20, 36, .8); box-shadow: 0 20px 80px rgba(0, 0, 0, .16); }
+.page-shell:not(.dark-page) .section-heading h2 { color: #edf4ff; }
+.page-shell:not(.dark-page) .section-heading p { color: #8294b2; }
+.page-shell:not(.dark-page) .pipeline { color: #627696; }
+.page-shell:not(.dark-page) .pipeline span.active, .page-shell:not(.dark-page) .pipeline span.done { color: #d7e4f8; }
+.page-shell:not(.dark-page) .pipeline span:not(:last-child)::after { background: rgba(145, 170, 214, .3); }
+.page-shell:not(.dark-page) .dataset-card { border-color: rgba(145, 170, 214, .15); background: #0d192b; }
+.page-shell:not(.dark-page) .dataset-card h3 { color: #e5efff; }
+.page-shell:not(.dark-page) .dataset-card p { color: #7f93b2; }
+.page-shell:not(.dark-page) .data-tags span { color: #91a4c3; border-color: rgba(145, 170, 214, .16); background: rgba(255, 255, 255, .045); }
+.page-shell:not(.dark-page) .bridge span { color: #7184a5; }
+.page-shell:not(.dark-page) .expansion-strip { border-color: rgba(145, 170, 214, .16); background: linear-gradient(100deg, #101f35, #0d192b); }
+.page-shell:not(.dark-page) .expansion-strip h2 { color: #e5efff; }
+.page-shell:not(.dark-page) .expansion-strip p { color: #8fa1be; }
+.page-shell:not(.dark-page) .healthcare-alert { border-color: rgba(145, 170, 214, .16); background: rgba(255, 255, 255, .045); }
+.page-shell:not(.dark-page) .healthcare-alert strong { color: #dce8fa; }
+.page-shell:not(.dark-page) .healthcare-alert span:not(.alert-pulse):not(.confidence) { color: #8fa1be; }
+.page-shell:not(.dark-page) .site-footer { color: #5d7194; }
+
 /* Fleet */
 .dark-page .eyebrow { color: #758aae; }.fleet-header { display: flex; justify-content: space-between; align-items: end; gap: 30px; padding: 54px 0 28px; }.fleet-header h1 { margin-bottom: 8px; color: #edf4ff; font-size: clamp(43px, 6vw, 72px); }.title-dot { color: var(--mint); }.fleet-header p { margin: 0; color: #8294b2; font-size: 13px; }.fleet-state { padding: 10px 12px; border: 1px solid rgba(145, 170, 214, .14); border-radius: 9px; background: rgba(255, 255, 255, .04); }.fleet-state strong { color: var(--mint); font-size: 9px; }
 .live-alert { display: flex; align-items: center; gap: 13px; margin: 0 0 19px; padding: 14px 16px; color: var(--ink); border: 1px solid rgba(255, 100, 124, .35); border-radius: 12px; background: rgba(125, 29, 57, .22); box-shadow: 0 9px 36px rgba(255, 61, 99, .11); }.alert-icon { display: grid; place-items: center; width: 29px; height: 29px; color: #fff; border-radius: 50%; background: var(--red); font-weight: 800; }.live-alert div:nth-child(2) { flex: 1; }.live-alert span { color: #ff9aaa; }.live-alert strong { display: block; margin: 4px 0 2px; font-size: 13px; }.live-alert p { margin: 0; color: #b898a4; font-size: 10px; }.live-alert button { color: #bf7d8b; border: 0; background: transparent; font-size: 22px; }
