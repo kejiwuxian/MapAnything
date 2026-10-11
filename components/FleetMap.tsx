@@ -124,6 +124,8 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
         { elementType: "geometry", stylers: [{ color: "#0b1424" }] },
         { elementType: "labels.text.fill", stylers: [{ color: "#8295b6" }] },
         { elementType: "labels.text.stroke", stylers: [{ color: "#0b1424" }] },
+        { featureType: "poi", elementType: "all", stylers: [{ visibility: "off" }] },
+        { featureType: "transit", elementType: "all", stylers: [{ visibility: "off" }] },
         { featureType: "road", elementType: "geometry", stylers: [{ color: "#17263b" }] },
         { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#233957" }] },
         { featureType: "water", elementType: "geometry", stylers: [{ color: "#07101d" }] },
@@ -182,17 +184,6 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
         objects.marker.setPosition(path[path.length - 1]);
       });
     });
-    workshops.forEach((workshop) => {
-      const marker = new googleMaps.maps.Marker({
-        position: workshop.position,
-        map,
-        title: workshop.name,
-        label: { text: "✚", color: "#f7f9ff", fontSize: "15px" },
-        icon: { path: googleMaps.maps.SymbolPath.CIRCLE, scale: 10, fillColor: "#283b59", fillOpacity: 1, strokeColor: "#83a0cf", strokeWeight: 2 },
-      });
-      objectsRef.current.push(marker);
-    });
-
     if (anomalyTruckId) {
       const anomalyTruck = trucks.find((truck) => truck.id === anomalyTruckId);
       const workshop = workshops.find((item) => item.id === anomalyTruck?.anomaly?.workshopId);
@@ -275,10 +266,6 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
         const route = routeForTruck(truck);
         const endpoint = project(route[route.length - 1]);
         return <button key={truck.id} className={`fallback-truck ${hasHover && hovered ? "is-hovered" : ""} ${hasHover && !hovered ? "is-dimmed" : ""} ${abnormal ? "is-abnormal" : ""}`} style={{ left: `${endpoint.x}%`, top: `${endpoint.y}%`, color: abnormal ? "#ff647c" : truck.accent }} onMouseEnter={() => hoverTruck(truck.id)} onMouseLeave={clearHoveredTruck} onClick={() => onSelectTruck(truck.id)} title={truck.id}>▴<span>{truck.id}</span></button>;
-      })}
-      {workshops.map((workshop) => {
-        const position = project(workshop.position);
-        return <div key={workshop.id} className="fallback-workshop" style={{ left: `${position.x}%`, top: `${position.y}%` }} title={workshop.name}>✚</div>;
       })}
       <div className="map-fallback-note">{roadRouteStatus === "ready" ? "OSRM road geometry · real streets" : roadRouteStatus === "loading" ? "Requesting road geometry…" : "Road routing unavailable · source path shown"}</div>
     </div>
