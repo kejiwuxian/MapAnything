@@ -1,0 +1,61 @@
+# MapAnything
+
+MapAnything is an application-independent SaaS prototype for discovering correlations between datasets that were never designed to match. It is the SpeedHacks/SR008 demo: the Fleet Agent is a customer application built on top of the reusable Core mapping layer, not the product boundary.
+
+## Demo surfaces
+
+- `/` — MapAnything Core: connect two datasets, run the mapping pipeline, and explore synchronized 3D cluster views.
+- `/fleet` — Fleet Agent: a reference logistics application using telemetry-to-maintenance mappings, a dark GIS view, anomaly explanation, and a targeted reroute.
+- `/operator` — Off-stage operator console: inject a live anomaly into the on-stage Fleet Agent without exposing simulation controls to the audience.
+
+## Quick start
+
+```bash
+npm install
+npm run dev
+```
+
+Open `http://localhost:3000/`. Open `/fleet` on the presentation screen and `/operator` on a second laptop or hidden browser window. The operator console sends events through `/api/events`; the Fleet Agent polls that endpoint and updates within approximately one second.
+
+Copy `.env.example` to `.env.local` and provide:
+
+- `VERCEL_AI_GATEWAY_API_KEY` for server-side explanation generation through Vercel AI Gateway.
+- `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` for the Google Maps, Places, and Directions rendering path.
+
+The repository intentionally includes a deterministic explanation and SVG map fallback so the demo still works if a provider is unavailable. The provided local `.env.local` is ignored by Git and must never be committed or pasted into client code.
+
+## What works today
+
+- Application-independent Core UI with generic dataset language.
+- Deterministic demo embeddings/clusters and cross-dataset mapping data.
+- Rotating projected 3D vector cluster canvases with hover cross-highlighting.
+- Fleet map with Google Maps loading, dark styling, route polylines, Places/Directions-ready integration, and a local visual fallback.
+- Off-stage event channel for live anomaly injection.
+- Vercel AI Gateway explanation route with a safe deterministic fallback.
+- Healthcare expansion vignette using synthetic clinical decision-support language.
+
+The hackathon mapping is intentionally deterministic and fast. It demonstrates the product contract and user value; it is not yet the dedicated contrastive-learning training system described in [`docs/GRAND_VISION.md`](docs/GRAND_VISION.md).
+
+## SpeedHacks positioning
+
+The core time-saving claim is that MapAnything can turn a repeated, multi-week data preparation and custom-modeling loop into a minutes-long first-pass mapping workflow. The Fleet Agent makes that value concrete: telemetry is mapped to maintenance concepts, an anomaly is explained, and an operational route is proposed.
+
+SpeedHacks asks builders to be explicit about mocked components and support time-saved claims. The demo therefore labels simulated routes, synthetic maintenance reports, and the healthcare vignette clearly.
+
+## Commands
+
+```bash
+npm run dev       # local development
+npm run typecheck # TypeScript validation
+npm run build     # production build validation
+```
+
+## Data attribution
+
+The fleet story is grounded in the [KIT Automotive OBD-II Dataset](https://radar.kit.edu/radar/en/dataset/bCtGxdTklQlfQcAq), by Marc Weber, Karlsruhe Institute of Technology. The demo uses a local representative fixture and synthetic operational records around it.
+
+## Security notes
+
+- API credentials are read from environment variables on the server where possible.
+- The Google Maps browser key is necessarily sent to the browser; restrict it by HTTP referrer and API scope in Google Cloud.
+- The in-memory event API is only suitable for a local hackathon demo. Production should use authenticated realtime messaging and durable storage.
