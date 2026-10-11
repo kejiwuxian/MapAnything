@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Truck, Workshop } from "../lib/demo-data";
 
 type Props = { trucks: Truck[]; workshops: Workshop[]; selectedTruckId: string; anomalyTruckId: string | null; onSelectTruck: (id: string) => void };
+type TruckMapObjects = { line: any; marker: any };
 
 function loadGoogleMaps(apiKey: string) {
   return new Promise<void>((resolve, reject) => {
@@ -27,8 +28,10 @@ function loadGoogleMaps(apiKey: string) {
 
 export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTruckId, onSelectTruck }: Props) {
   const mapRef = useRef<HTMLDivElement | null>(null);
-  const objectsRef = useRef<unknown[]>([]);
+  const objectsRef = useRef<any[]>([]);
+  const truckObjectsRef = useRef<Record<string, TruckMapObjects>>({});
   const [mapMode, setMapMode] = useState<"google" | "fallback">("fallback");
+  const [hoveredTruckId, setHoveredTruckId] = useState<string | null>(null);
 
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -45,11 +48,16 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
   }, []);
 
   useEffect(() => {
+    setHoveredTruckId(null);
+  }, [trucks, anomalyTruckId]);
+
+  useEffect(() => {
     if (mapMode !== "google" || !mapRef.current) return;
     const googleMaps = (window as Window & { google?: any }).google;
     if (!googleMaps?.maps) return;
     objectsRef.current.forEach((object: any) => object?.setMap?.(null));
     objectsRef.current = [];
+    truckObjectsRef.current = {};
     const selected = trucks.find((truck) => truck.id === selectedTruckId) ?? trucks[0];
     const map = new googleMaps.maps.Map(mapRef.current, {
       center: selected.route[Math.floor(selected.route.length / 2)],
@@ -66,26 +74,31 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
     });
 
     for (const truck of trucks) {
-      const active = truck.id === selectedTruckId;
       const abnormal = truck.id === anomalyTruckId;
       const line = new googleMaps.maps.Polyline({
         path: truck.route,
         geodesic: true,
-        strokeColor: abnormal ? "#ff647c" : active ? truck.accent : "#415271",
-        strokeOpacity: abnormal || active ? 0.95 : 0.32,
-        strokeWeight: abnormal || active ? 5 : 2,
+        strokeColor: abnormal ? "#ff647c" : truck.accent,
+        strokeOpacity: abnormal ? 0.92 : 0.82,
+        strokeWeight: abnormal ? 4 : 2,
         map,
       });
-      line.addListener("mouseover", () => onSelectTruck(truck.id));
+      line.addListener("mouseover", () => setHoveredTruckId(truck.id));
+      line.addListener("mouseout", () => setHoveredTruckId(null));
+      line.addListener("click", () => onSelectTruck(truck.id));
       objectsRef.current.push(line);
+
       const marker = new googleMaps.maps.Marker({
         position: truck.route[truck.route.length - 1],
         map,
         title: truck.id,
-        label: { text: "▴", color: abnormal ? "#ff647c" : truck.accent, fontSize: active ? "26px" : "19px" },
-        icon: { path: googleMaps.maps.SymbolPath.CIRCLE, scale: active ? 11 : 7, fillColor: abnormal ? "#ff647c" : truck.accent, fillOpacity: 0.95, strokeColor: "#07101d", strokeWeight: 3 },
+        label: { text: "▴", color: abnormal ? "#ff647c" : truck.accent, fontSize: "19px" },
+        icon: { path: googleMaps.maps.SymbolPath.CIRCLE, scale: 7, fillColor: abnormal ? "#ff647c" : truck.accent, fillOpacity: 0.95, strokeColor: "#07101d", strokeWeight: 3 },
       });
+      marker.addListener("mouseover", () => setHoveredTruckId(truck.id));
+      marker.addListener("mouseout", () => setHoveredTruckId(null));
       marker.addListener("click", () => onSelectTruck(truck.id));
+      truckObjectsRef.current[truck.id] = { line, marker };
       objectsRef.current.push(marker);
     }
     workshops.forEach((workshop) => {
@@ -112,9 +125,39 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
         objectsRef.current.push(renderer);
       }
     }
+
+    return () => {
+      objectsRef.current.forEach((object: any) => object?.setMap?.(null));
+      objectsRef.current = [];
+      truckObjectsRef.current = {};
+    };
   }, [mapMode, trucks, workshops, selectedTruckId, anomalyTruckId, onSelectTruck]);
 
+  useEffect(() => {
+    const hasHover = Boolean(hoveredTruckId);
+    for (const truck of trucks) {
+      const objects = truckObjectsRef.current[truck.id];
+      if (!objects) continue;
+      const abnormal = truck.id === anomalyTruckId;
+      const hovered = truck.id === hoveredTruckId;
+      const opacity = hasHover ? (hovered ? 0.98 : 0.16) : abnormal ? 0.92 : 0.82;
+      objects.line.setOptions({ strokeColor: abnormal ? "#ff647c" : truck.accent, strokeOpacity: opacity, strokeWeight: hovered ? 5 : abnormal ? 4 : 2 });
+      objects.marker.setOptions({
+        label: { text: "▴", color: abnormal ? "#ff647c" : truck.accent, fontSize: hovered ? "26px" : "19px" },
+        icon: { path: (window as Window & { google?: any }).google.maps.SymbolPath.CIRCLE, scale: hovered ? 11 : 7, fillColor: abnormal ? "#ff647c" : truck.accent, fillOpacity: hasHover && !hovered ? 0.3 : 0.95, strokeColor: "#07101d", strokeWeight: 3 },
+      });
+    }
+  }, [hoveredTruckId, trucks, anomalyTruckId, mapMode]);
+
   if (mapMode === "google") return <div ref={mapRef} className="fleet-map" aria-label="Google Maps fleet map" />;
+
+  const routePoints = trucks.flatMap((truck) => truck.route);
+  const minLat = Math.min(...routePoints.map((point) => point.lat), ...workshops.map((workshop) => workshop.position.lat));
+  const maxLat = Math.max(...routePoints.map((point) => point.lat), ...workshops.map((workshop) => workshop.position.lat));
+  const minLng = Math.min(...routePoints.map((point) => point.lng), ...workshops.map((workshop) => workshop.position.lng));
+  const maxLng = Math.max(...routePoints.map((point) => point.lng), ...workshops.map((workshop) => workshop.position.lng));
+  const project = (point: { lat: number; lng: number }) => ({ x: ((point.lng - minLng) / (maxLng - minLng)) * 76 + 12, y: (1 - (point.lat - minLat) / (maxLat - minLat)) * 66 + 16 });
+  const hasHover = Boolean(hoveredTruckId);
 
   return (
     <div ref={mapRef} className="fleet-map fallback-map" aria-label="Fleet map fallback">
@@ -122,14 +165,27 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
       <div className="map-road road-a" />
       <div className="map-road road-b" />
       <div className="map-road road-c" />
-      {trucks.map((truck, index) => {
-        const active = truck.id === selectedTruckId;
+      <svg className="fallback-routes" viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="Fleet routes">
+        {trucks.map((truck) => {
+          const abnormal = truck.id === anomalyTruckId;
+          const hovered = truck.id === hoveredTruckId;
+          const points = truck.route.map((point) => {
+            const projected = project(point);
+            return `${projected.x},${projected.y}`;
+          }).join(" ");
+          return <polyline key={truck.id} className={`fallback-route ${hasHover && hovered ? "is-hovered" : ""} ${hasHover && !hovered ? "is-dimmed" : ""}`} points={points} style={{ stroke: abnormal ? "#ff647c" : truck.accent }} onMouseEnter={() => setHoveredTruckId(truck.id)} onMouseLeave={() => setHoveredTruckId(null)} onClick={() => onSelectTruck(truck.id)} />;
+        })}
+      </svg>
+      {trucks.map((truck) => {
         const abnormal = truck.id === anomalyTruckId;
-        const x = 18 + (index * 18) % 70;
-        const y = 25 + ((index * 29) % 58);
-        return <button key={truck.id} className={`fallback-truck ${active ? "is-active" : ""} ${abnormal ? "is-abnormal" : ""}`} style={{ left: `${x}%`, top: `${y}%`, color: abnormal ? "#ff647c" : truck.accent }} onClick={() => onSelectTruck(truck.id)} title={truck.id}>▴<span>{truck.id}</span></button>;
+        const hovered = truck.id === hoveredTruckId;
+        const endpoint = project(truck.route[truck.route.length - 1]);
+        return <button key={truck.id} className={`fallback-truck ${hasHover && hovered ? "is-hovered" : ""} ${hasHover && !hovered ? "is-dimmed" : ""} ${abnormal ? "is-abnormal" : ""}`} style={{ left: `${endpoint.x}%`, top: `${endpoint.y}%`, color: abnormal ? "#ff647c" : truck.accent }} onMouseEnter={() => setHoveredTruckId(truck.id)} onMouseLeave={() => setHoveredTruckId(null)} onClick={() => onSelectTruck(truck.id)} title={truck.id}>▴<span>{truck.id}</span></button>;
       })}
-      {workshops.map((workshop, index) => <div key={workshop.id} className="fallback-workshop" style={{ left: `${28 + index * 27}%`, top: `${72 - index * 18}%` }} title={workshop.name}>✚</div>)}
+      {workshops.map((workshop) => {
+        const position = project(workshop.position);
+        return <div key={workshop.id} className="fallback-workshop" style={{ left: `${position.x}%`, top: `${position.y}%` }} title={workshop.name}>✚</div>;
+      })}
       <div className="map-fallback-note">Google Maps API loading / demo fallback</div>
     </div>
   );
