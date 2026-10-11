@@ -86,18 +86,20 @@ export default function ClusterCanvas({ clusters, hoveredId, onHover }: Props) {
   }, [clusters, hoveredId]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="cluster-canvas"
-      onMouseMove={(event) => {
-        const rect = event.currentTarget.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        const hit = pointsRef.current.find((point) => Math.hypot(point.x - x, point.y - y) < point.r);
-        onHover(hit?.cluster.id ?? null);
-      }}
-      onMouseLeave={() => onHover(null)}
-      aria-label="Interactive rotating 3D vector cluster view"
-    />
+    <div className="cluster-canvas-wrap">
+      <canvas
+        ref={canvasRef}
+        className="cluster-canvas"
+        onMouseMove={(event) => {
+          const rect = event.currentTarget.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const y = event.clientY - rect.top;
+          const hit = pointsRef.current.find((point) => Math.hypot(point.x - x, point.y - y) < point.r);
+          onHover(hit?.cluster.id ?? null);
+        }}
+        onMouseLeave={() => onHover(null)}
+        aria-label="Interactive rotating 3D vector cluster view"
+      />
+    </div>
   );
 }
