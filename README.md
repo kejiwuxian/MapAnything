@@ -7,6 +7,7 @@ MapAnything is an application-independent SaaS prototype for discovering correla
 - `/` — MapAnything Core: connect two datasets, run the mapping pipeline, and explore synchronized 3D cluster views.
 - `/fleet` — Fleet Agent: a reference logistics application using telemetry-to-maintenance mappings, a dark GIS view, anomaly explanation, and a targeted reroute.
 - `/operator` — Off-stage operator console: inject a live anomaly into the on-stage Fleet Agent without exposing simulation controls to the audience.
+- `/presentation` — Stage Mode: the four-minute rehearsal and screen-recording flow, with speaker cues, keyboard navigation, progress tracking, and smooth transitions into the real Core/Fleet pages.
 
 ## Quick start
 

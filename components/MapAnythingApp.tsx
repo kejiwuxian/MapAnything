@@ -7,7 +7,7 @@ import FleetMap from "./FleetMap";
 import { anomalyProfiles, baseTrucks, mappings, reportClusters, telemetryClusters, workshops, type AnomalyEvent, type AnomalyType, type PageKey, type Truck } from "../lib/demo-data";
 
 function Header({ page }: { page: PageKey }) {
-  return <header className="topbar"><Link href="/" className="brand"><span className="brand-mark">M</span><span>MAPANYTHING</span><small>SR008 / SPEEDHACKS</small></Link><nav><Link className={page === "core" ? "active" : ""} href="/">Core Platform</Link><Link className={page === "fleet" ? "active" : ""} href="/fleet">Fleet Agent</Link></nav><div className="live-pill"><span className="pulse-dot" /> Live workspace</div></header>;
+  return <header className="topbar"><Link href="/" className="brand"><span className="brand-mark">M</span><span>MAPANYTHING</span><small>SR008 / SPEEDHACKS</small></Link><nav><Link className={page === "core" ? "active" : ""} href="/">Core Platform</Link><Link className={page === "fleet" ? "active" : ""} href="/fleet">Fleet Agent</Link><Link href="/presentation">Stage Mode</Link></nav><div className="live-pill"><span className="pulse-dot" /> Live workspace</div></header>;
 }
 
 function StatusBadge({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "success" | "warning" | "danger" }) { return <span className={`status-badge ${tone}`}>{children}</span>; }
