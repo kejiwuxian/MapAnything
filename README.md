@@ -1,6 +1,6 @@
 # MapAnything
 
-MapAnything is an application-independent SaaS prototype for discovering correlations between datasets that were never designed to match. It is the SpeedHacks/SR008 demo: the Fleet Agent is a customer application built on top of the reusable Core mapping layer, not the product boundary.
+MapAnything is the data alignment layer for startups building intelligent products before their datasets are perfectly labeled. It discovers correlations between datasets that were never designed to match, so a small team can reach a customer-ready workflow without building a bespoke labeling and modeling pipeline for every vertical. The Fleet Agent is one customer application built on top of the reusable Core mapping layer, not the product boundary.
 
 ## Demo surfaces
 
@@ -39,7 +39,7 @@ The hackathon mapping is intentionally deterministic and fast. It demonstrates t
 
 ## SpeedHacks positioning
 
-The core time-saving claim is that MapAnything can turn a repeated, multi-week data preparation and custom-modeling loop into a minutes-long first-pass mapping workflow. The Fleet Agent makes that value concrete: telemetry is mapped to maintenance concepts, an anomaly is explained, and an operational route is proposed.
+The startup value proposition is faster time-to-product: MapAnything can turn a repeated, multi-week data preparation and custom-modeling loop into a minutes-long first-pass mapping workflow. The Fleet Agent makes that value concrete: telemetry is mapped to maintenance concepts, an anomaly is explained, and an operational route is proposed.
 
 SpeedHacks asks builders to be explicit about mocked components and support time-saved claims. The demo therefore labels simulated routes, synthetic maintenance reports, and the healthcare vignette clearly.
 

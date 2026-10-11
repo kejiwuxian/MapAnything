@@ -4,7 +4,7 @@ This script is synchronized with `/presentation`. Use the stage-mode page for re
 
 ## 0:00–0:20 — Problem
 
-“Most companies have valuable data, but it lives in separate systems. Telemetry is in one place. Maintenance reports, clinical records, or operational outcomes are somewhere else. The expensive part is not collecting the data—it is labeling it, aligning it, and training a custom model every time a new customer or domain appears. MapAnything gives that time back.”
+“Startups are expected to turn messy customer data into a product before they have a large data team. But telemetry is in one place, reports are somewhere else, and every new vertical creates another labeling and custom-modeling project. MapAnything gives founders a faster path from unfamiliar data to a customer-ready workflow.”
 
 ## 0:20–0:55 — Core product
 
@@ -40,4 +40,4 @@ Click **Accept reroute**.
 
 ## 3:25–4:00 — Close
 
-“Today, this workflow is a focused prototype. The larger vision is a reusable mapping layer for any domain where important datasets do not naturally match. Instead of repeating weeks of labeling, alignment, and custom model training, teams can build on a shared correlation map. Fleet maintenance is our first wedge. Healthcare, industrial operations, and other high-value workflows can use the same Core platform. MapAnything gives teams their time back by turning unmatched data into actionable insight.”
+“Today, this is a focused startup wedge. The larger vision is a reusable data alignment layer for every domain where important datasets do not naturally match. Instead of rebuilding labels and custom models for each customer, a small team can reuse the same correlation infrastructure across verticals. Fleet maintenance is our first wedge. Healthcare, industrial operations, and other high-value workflows can use the same Core platform. MapAnything helps startups ship intelligent products before their data is perfect.”

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { AnomalyEvent } from "../../../lib/demo-data";
 
 declare global {
-  // This intentionally uses process memory for the local hackathon demo.
+  // This intentionally uses process memory for the local startup demo.
   // Production should replace it with Redis, Postgres, or a realtime service.
   var mapAnythingEvent: AnomalyEvent | null | undefined;
 }
