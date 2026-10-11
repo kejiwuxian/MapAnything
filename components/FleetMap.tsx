@@ -30,6 +30,7 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
   const mapRef = useRef<HTMLDivElement | null>(null);
   const objectsRef = useRef<any[]>([]);
   const truckObjectsRef = useRef<Record<string, TruckMapObjects>>({});
+  const routePathsRef = useRef<Record<string, { lat: number; lng: number }[]>>({});
   const [mapMode, setMapMode] = useState<"google" | "fallback">("fallback");
   const [hoveredTruckId, setHoveredTruckId] = useState<string | null>(null);
 
@@ -76,7 +77,7 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
     for (const truck of trucks) {
       const abnormal = truck.id === anomalyTruckId;
       const line = new googleMaps.maps.Polyline({
-        path: truck.route,
+        path: routePathsRef.current[truck.id] ?? truck.route,
         geodesic: true,
         strokeColor: abnormal ? "#ff647c" : truck.accent,
         strokeOpacity: abnormal ? 0.92 : 0.82,
@@ -89,7 +90,7 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
       objectsRef.current.push(line);
 
       const marker = new googleMaps.maps.Marker({
-        position: truck.route[truck.route.length - 1],
+        position: (routePathsRef.current[truck.id] ?? truck.route)[(routePathsRef.current[truck.id] ?? truck.route).length - 1],
         map,
         title: truck.id,
         label: { text: "▴", color: abnormal ? "#ff647c" : truck.accent, fontSize: "19px" },
@@ -101,6 +102,26 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
       truckObjectsRef.current[truck.id] = { line, marker };
       objectsRef.current.push(marker);
     }
+
+    let routeRequestsActive = true;
+    const routeService = new googleMaps.maps.DirectionsService();
+    trucks.forEach((truck) => {
+      routeService.route({
+        origin: truck.route[0],
+        destination: truck.route[truck.route.length - 1],
+        waypoints: truck.route.slice(1, -1).map((point) => ({ location: point, stopover: false })),
+        travelMode: googleMaps.maps.TravelMode.DRIVING,
+        provideRouteAlternatives: false,
+      }, (result: any, status: string) => {
+        if (!routeRequestsActive || status !== "OK" || !result?.routes?.[0]?.overview_path) return;
+        const path = result.routes[0].overview_path.map((point: any) => ({ lat: point.lat(), lng: point.lng() }));
+        routePathsRef.current[truck.id] = path;
+        const objects = truckObjectsRef.current[truck.id];
+        if (!objects) return;
+        objects.line.setPath(path);
+        objects.marker.setPosition(path[path.length - 1]);
+      });
+    });
     workshops.forEach((workshop) => {
       const marker = new googleMaps.maps.Marker({
         position: workshop.position,
@@ -127,9 +148,11 @@ export default function FleetMap({ trucks, workshops, selectedTruckId, anomalyTr
     }
 
     return () => {
+      routeRequestsActive = false;
       objectsRef.current.forEach((object: any) => object?.setMap?.(null));
       objectsRef.current = [];
       truckObjectsRef.current = {};
+      routePathsRef.current = {};
     };
   }, [mapMode, trucks, workshops, selectedTruckId, anomalyTruckId, onSelectTruck]);
 

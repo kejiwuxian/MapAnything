@@ -30,6 +30,12 @@ export type Truck = {
   status: "healthy" | "watch" | "anomaly";
   route: { lat: number; lng: number }[];
   accent: string;
+  telemetry: {
+    rpm: number;
+    coolantTemp: number;
+    airflow: number;
+    speed: number;
+  };
   anomaly?: {
     type: string;
     score: number;
@@ -76,12 +82,18 @@ export const workshops: Workshop[] = [
   { id: "W-03", name: "Redwood Truck Service", specialty: "Engine + intake", position: { lat: 37.425, lng: -122.085 } },
 ];
 
+export const fleetSourceDataset = {
+  name: "KIT Automotive OBD-II Dataset",
+  shortName: "KIT OBD-II fixture",
+  url: "https://radar.kit.edu/radar/en/dataset/bCtGxdTklQlfQcAq",
+};
+
 export const baseTrucks: Truck[] = [
-  { id: "TX-204", driver: "M. Chen", status: "healthy", accent: "#52e6b5", route: [{ lat: 37.37, lng: -122.09 }, { lat: 37.39, lng: -122.075 }, { lat: 37.41, lng: -122.06 }, { lat: 37.43, lng: -122.04 }] },
-  { id: "TX-118", driver: "J. Rivera", status: "healthy", accent: "#6d8cff", route: [{ lat: 37.35, lng: -122.06 }, { lat: 37.37, lng: -122.04 }, { lat: 37.4, lng: -122.02 }, { lat: 37.43, lng: -122.015 }] },
-  { id: "TX-330", driver: "A. Patel", status: "watch", accent: "#ffb86b", route: [{ lat: 37.42, lng: -122.1 }, { lat: 37.41, lng: -122.075 }, { lat: 37.4, lng: -122.05 }, { lat: 37.39, lng: -122.02 }] },
-  { id: "TX-087", driver: "R. Kim", status: "healthy", accent: "#b18cff", route: [{ lat: 37.35, lng: -122.105 }, { lat: 37.37, lng: -122.09 }, { lat: 37.39, lng: -122.08 }, { lat: 37.42, lng: -122.075 }] },
-  { id: "TX-451", driver: "S. Morgan", status: "healthy", accent: "#f27fa3", route: [{ lat: 37.44, lng: -122.095 }, { lat: 37.42, lng: -122.08 }, { lat: 37.4, lng: -122.065 }, { lat: 37.38, lng: -122.05 }] },
+  { id: "TX-204", driver: "M. Chen", status: "healthy", accent: "#52e6b5", telemetry: { rpm: 1880, coolantTemp: 88.4, airflow: 42.1, speed: 56.2 }, route: [{ lat: 37.37, lng: -122.09 }, { lat: 37.39, lng: -122.075 }, { lat: 37.41, lng: -122.06 }, { lat: 37.43, lng: -122.04 }] },
+  { id: "TX-118", driver: "J. Rivera", status: "healthy", accent: "#6d8cff", telemetry: { rpm: 1640, coolantTemp: 84.8, airflow: 38.7, speed: 62.5 }, route: [{ lat: 37.35, lng: -122.06 }, { lat: 37.37, lng: -122.04 }, { lat: 37.4, lng: -122.02 }, { lat: 37.43, lng: -122.015 }] },
+  { id: "TX-330", driver: "A. Patel", status: "watch", accent: "#ffb86b", telemetry: { rpm: 2140, coolantTemp: 93.1, airflow: 35.4, speed: 44.8 }, route: [{ lat: 37.42, lng: -122.1 }, { lat: 37.41, lng: -122.075 }, { lat: 37.4, lng: -122.05 }, { lat: 37.39, lng: -122.02 }] },
+  { id: "TX-087", driver: "R. Kim", status: "healthy", accent: "#b18cff", telemetry: { rpm: 1520, coolantTemp: 86.2, airflow: 40.3, speed: 58.9 }, route: [{ lat: 37.35, lng: -122.105 }, { lat: 37.37, lng: -122.09 }, { lat: 37.39, lng: -122.08 }, { lat: 37.42, lng: -122.075 }] },
+  { id: "TX-451", driver: "S. Morgan", status: "healthy", accent: "#f27fa3", telemetry: { rpm: 1760, coolantTemp: 87.6, airflow: 41.2, speed: 51.7 }, route: [{ lat: 37.44, lng: -122.095 }, { lat: 37.42, lng: -122.08 }, { lat: 37.4, lng: -122.065 }, { lat: 37.38, lng: -122.05 }] },
 ];
 
 export const anomalyProfiles = {
