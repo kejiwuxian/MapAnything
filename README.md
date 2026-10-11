@@ -1,13 +1,78 @@
 # MapAnything
 
-MapAnything is the data alignment layer for startups building intelligent products before their datasets are perfectly labeled. It discovers correlations between datasets that were never designed to match, so a small team can reach a customer-ready workflow without building a bespoke labeling and modeling pipeline for every vertical. The Fleet Agent is one customer application built on top of the reusable Core mapping layer, not the product boundary.
+### The startup data layer for turning unmatched data into customer-ready products.
 
-## Demo surfaces
+MapAnything helps a lean team discover useful relationships between datasets that were never designed to match: no obvious labels, no shared timestamp, and no weeks spent building a one-off labeling and modeling pipeline for every new customer.
 
-- `/` — MapAnything Core: connect two datasets, run the mapping pipeline, and explore synchronized 3D cluster views.
-- `/fleet` — Fleet Agent: a reference logistics application using telemetry-to-maintenance mappings, live-style KIT OBD-II windows, Google route geometry, anomaly explanation, and a targeted reroute.
-- `/operator` — Off-stage operator console: inject a live anomaly into the on-stage Fleet Agent without exposing simulation controls to the audience.
-- `/presentation` — Stage Mode: the four-minute rehearsal and screen-recording flow, with speaker cues, keyboard navigation, progress tracking, and smooth transitions into the real Core/Fleet pages.
+The platform is application-independent. **Fleet Agent** is one reference customer solution built on top of the Core mapping layer—not the product boundary.
+
+## The elevator pitch
+
+Every intelligent product startup eventually hits the same bottleneck: the data that matters exists in different systems, with different schemas, different sampling rates, and different definitions of “normal.” Before the team can ship an agent, it has to label data, align records, and train custom models for each vertical.
+
+MapAnything turns that bottleneck into a reusable product layer. It maps two unfamiliar data worlds into an inspectable relationship, exposes evidence and confidence, and gives a startup a fast first path to a customer workflow. Fleet Agent makes the idea tangible: vehicle telemetry is connected to maintenance knowledge, an anomaly is explained, and a truck is routed to a targeted workshop.
+
+## What the demo shows
+
+The four-minute SpeedHacks / SR008 demo follows one idea from abstract platform to customer action:
+
+1. **MapAnything Core** connects telemetry to another data domain and renders the discovered mapping as two interactive 3D vector spaces.
+2. **Healthcare vignette** shows how wearable signals could connect to delayed medical reports to produce an early warning and focus clinical inspection. It is explicitly synthetic decision support, not diagnosis.
+3. **Fleet Agent** uses the KIT Automotive OBD-II dataset as the source signal and turns mapped telemetry into a logistics workflow.
+4. **Live event** arrives from an off-stage operator. The Fleet Agent highlights the affected truck, explains the mapped maintenance issue, and proposes a real-road reroute to a workshop.
+
+## Demo URLs
+
+| URL | Purpose |
+| --- | --- |
+| `/` | Application-independent MapAnything Core: upload two datasets, run clustering and alignment, and inspect cross-domain evidence. |
+| `/fleet` | Fleet Agent customer application: live-style telemetry, road-following routes, anomaly explanation, and targeted rerouting. |
+| `/operator` | Private off-stage console for manually injecting or clearing a fleet anomaly. |
+| `/presentation` | Stage Mode: the four-minute narrative and transitions into the Core and Fleet pages. |
+| `/teleprompter` | Direct-only compact teleprompter with timer, script line, click/do instruction, and automatic TX-204 anomaly injection at 02:40. |
+
+The teleprompter is intentionally not linked from the public demo surfaces. Keep it pinned at the top of a second screen while recording the main presentation screen.
+
+## Why it matters to a startup
+
+- **Less labeling:** get a useful first mapping before building a perfect annotation program.
+- **Less custom modeling:** reuse the correlation layer across customers and verticals.
+- **Faster onboarding:** move from unfamiliar customer data to a workflow demo in minutes.
+- **More explainable output:** expose the mapped evidence and confidence instead of returning an opaque score.
+- **A wedge with expansion:** start with fleet operations, then reuse the same infrastructure for healthcare, industrial maintenance, insurance, energy, and other domains.
+
+## Architecture
+
+```text
+Dataset A + Dataset B
+        │
+        ▼
+Normalize → Embed / cluster → Cross-domain alignment → Evidence + confidence
+        │                                                │
+        ├── MapAnything Core 3D inspection               └── Customer applications
+        │                                                       ├── Fleet Agent
+        │                                                       └── Healthcare early warning
+        ▼
+Reusable mapping API and agent-ready signals
+```
+
+The hackathon implementation is intentionally fast and deterministic. It uses normalized K-means clustering over the complete KIT RADAR log-summary archive, a JEV-style alignment layer, and real source-derived point clouds. It demonstrates the product contract and user value without pretending that a production training system already exists.
+
+The longer-term architecture is documented in [`docs/GRAND_VISION.md`](docs/GRAND_VISION.md): replace the deterministic alignment step with a dedicated contrastive-learning architecture that learns a reusable shared space across modalities, supports retrieval and explanation, and can be adapted to customer-specific domains without rebuilding the entire pipeline.
+
+## Fleet Agent details
+
+Fleet Agent is the reference customer application built on MapAnything Core.
+
+- Source signal: the [KIT Automotive OBD-II Dataset](https://radar.kit.edu/radar/en/dataset/bCtGxdTklQlfQcAq).
+- Source coverage: 81 CSV logs, 2,693,824 readings, and 10 OBD-II channels in the published archive.
+- Runtime story: a deterministic live-style telemetry projection derived from the full source archive.
+- Target vocabulary: synthetic maintenance concepts used to make the customer workflow explicit.
+- Map: Google Maps with dark styling and Google road routing when available.
+- Fallback: full road geometry from OSRM keeps the route visible if the Google Directions response is delayed or unavailable.
+- Event channel: the local `/api/events` endpoint connects the off-stage operator, teleprompter automation, and Fleet Agent.
+
+All fleet trucks and routes remain visible. Hovering changes emphasis; clicking changes focus. The abnormal truck and workshop reroute use the same real-road geometry path.
 
 ## Quick start
 
@@ -16,47 +81,54 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:3000/`. Open `/fleet` on the presentation screen and `/operator` on a second laptop or hidden browser window. The operator console sends events through `/api/events`; the Fleet Agent polls that endpoint and updates within approximately one second.
+Then open `http://localhost:3000/`.
 
-Copy `.env.example` to `.env.local` and provide:
+For a full rehearsal:
 
-- `VERCEL_AI_GATEWAY_API_KEY` for server-side explanation generation through Vercel AI Gateway.
-- `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` for the Google Maps, Places, and Directions rendering path.
+1. Open `/presentation` on the recording display.
+2. Open `/fleet` on the stage display when the narrative reaches Fleet Agent.
+3. Open `/operator` on an off-stage device, or start `/teleprompter` on the second screen.
+4. Start the teleprompter. At `02:40`, it automatically sends the TX-204 cooling anomaly to Fleet Agent.
 
-The repository intentionally includes a deterministic explanation and SVG map fallback so the demo still works if a provider is unavailable. The provided local `.env.local` is ignored by Git and must never be committed or pasted into client code.
+## Environment variables
 
-## What works today
+Copy `.env.example` to `.env.local`:
 
-- Application-independent Core UI with generic dataset language.
-- Runtime normalized K-means clustering over all 81 KIT RADAR log summaries, with 2,693,824 source readings and 10 OBD-II channels represented in the cluster counts and point clouds.
-- Rotating projected 3D vector cluster canvases with hover cross-highlighting.
-- Fleet map with Google Maps loading, dark styling, real Google DirectionsService routes generated from each source route, Places/Directions-ready rerouting, and a local visual fallback.
-- Off-stage event channel for live anomaly injection.
-- Vercel AI Gateway explanation route with a safe deterministic fallback.
-- Healthcare expansion vignette using synthetic clinical decision-support language.
+```text
+VERCEL_AI_GATEWAY_API_KEY=...
+AI_GATEWAY_MODEL=openai/gpt-4o-mini
+AI_GATEWAY_BASE_URL=https://ai-gateway.vercel.sh/v1/chat/completions
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=...
+```
 
-The hackathon mapping is intentionally deterministic and fast. It demonstrates the product contract and user value; it is not yet the dedicated contrastive-learning training system described in [`docs/GRAND_VISION.md`](docs/GRAND_VISION.md).
+- The Vercel AI Gateway credential is used server-side for the explanation route.
+- The Google Maps browser key is necessarily exposed to the browser; restrict it by HTTP referrer and API scope.
+- Never commit `.env.local` or paste credentials into client code.
 
-## SpeedHacks positioning
-
-The startup value proposition is faster time-to-product: MapAnything can turn a repeated, multi-week data preparation and custom-modeling loop into a minutes-long first-pass mapping workflow. The Fleet Agent makes that value concrete: telemetry is mapped to maintenance concepts, an anomaly is explained, and an operational route is proposed.
-
-SpeedHacks asks builders to be explicit about mocked components and support time-saved claims. The demo therefore labels the complete KIT RADAR source archive, synthetic maintenance vocabulary, and the healthcare vignette clearly; route geometry is generated by Google for the source endpoints, while the stage telemetry stream is a deterministic live-style projection of the full source archive.
+The demo includes deterministic explanation and visual route fallbacks so the local presentation can continue when a provider is unavailable. The event API uses process memory and is suitable only for a local hackathon demonstration.
 
 ## Commands
 
 ```bash
-npm run dev       # local development
-npm run typecheck # TypeScript validation
-npm run build     # production build validation
+npm run dev        # local development
+npm run typecheck  # TypeScript validation
+npm run build      # production build validation
 ```
+
+## Hackathon positioning
+
+MapAnything is built for the A16Z SpeedHacks / SpeedRun SR008 framing: show a startup tool that saves time and resources before it becomes a horizontal platform.
+
+The demo claim is deliberately scoped:
+
+> MapAnything gives a small team a reusable first-pass mapping layer, so it can validate a customer workflow before committing to weeks of labeling and custom model training.
+
+The production vision is larger than the hackathon: a learned, application-independent contrastive representation layer that continuously maps new customer data, retrieves the most relevant evidence, explains its confidence, and powers agents across domains.
 
 ## Data attribution
 
-The fleet story is grounded in the [KIT Automotive OBD-II Dataset](https://radar.kit.edu/radar/en/dataset/bCtGxdTklQlfQcAq), by Marc Weber, Karlsruhe Institute of Technology. The published archive contains 81 CSV logs, 2,693,824 readings, and 10 OBD-II channels (archive version 1, 11.6 MB). The demo maps the complete archive metadata and derives the live-style stage stream from that full source; maintenance concepts are explicitly synthetic target vocabulary for the customer-use-case walkthrough.
+The fleet story is grounded in the [KIT Automotive OBD-II Dataset](https://radar.kit.edu/radar/en/dataset/bCtGxdTklQlfQcAq), by Marc Weber, Karlsruhe Institute of Technology. The healthcare example and maintenance target vocabulary are synthetic demo concepts and are not medical advice or a production diagnostic system.
 
-## Security notes
+## License and demo status
 
-- API credentials are read from environment variables on the server where possible.
-- The Google Maps browser key is necessarily sent to the browser; restrict it by HTTP referrer and API scope in Google Cloud.
-- The in-memory event API is only suitable for a local hackathon demo. Production should use authenticated realtime messaging and durable storage.
+This repository is a hackathon demo and startup prototype. The current implementation prioritizes a credible end-to-end product experience, transparent demo boundaries, and a clear path to a production contrastive-learning architecture.
