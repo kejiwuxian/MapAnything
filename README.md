@@ -29,7 +29,7 @@ The four-minute SpeedHacks / SR008 demo follows one idea from abstract platform 
 | `/fleet` | Fleet Agent customer application: live-style telemetry, road-following routes, anomaly explanation, and targeted rerouting. |
 | `/operator` | Private off-stage console for manually injecting or clearing a fleet anomaly. |
 | `/presentation` | Stage Mode: the four-minute narrative and transitions into the Core and Fleet pages. |
-| `/teleprompter` | Direct-only compact three-minute teleprompter with PageDown cue control, cross-tab stage navigation, click/do instruction, and TX-204 anomaly injection when the live-event cue is triggered at 02:15. |
+| `/teleprompter` | Direct-only compact three-minute teleprompter with PageDown cue control, cross-tab/cross-window stage navigation, click/do instruction, and TX-204 anomaly injection when the live-event cue is triggered at 02:15. |
 
 The teleprompter is intentionally not linked from the public demo surfaces. Keep it pinned at the top of a second screen while recording the main presentation screen.
 
