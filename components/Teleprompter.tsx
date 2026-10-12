@@ -83,11 +83,11 @@ export default function Teleprompter() {
       </header>
 
       <section className="teleprompter-main">
-        <div className="teleprompter-topline"><span>2:00 PRESENTATION SCRIPT</span><span>{activeIndex + 1} / {teleprompterScript.length}</span></div>
+        <div className="teleprompter-topline"><span>3:00 PRESENTATION SCRIPT</span><span>{activeIndex + 1} / {teleprompterScript.length}</span></div>
         <div className="teleprompter-clock-row">
           <strong>{formatClock(elapsed)}</strong><span>/ {formatClock(TELEPROMPTER_TOTAL_SECONDS)}</span>
           <div className="teleprompter-progress"><i style={{ width: `${progress}%` }} /></div>
-          <span className={`teleprompter-event-state ${eventState}`}><i />{eventState === "armed" ? "AUTO EVENT ARMED · 01:20" : eventState === "sending" ? "SENDING TX-204 EVENT" : eventState === "sent" ? "TX-204 EVENT SENT" : "EVENT FAILED"}</span>
+          <span className={`teleprompter-event-state ${eventState}`}><i />{eventState === "armed" ? "AUTO EVENT ARMED · 02:15" : eventState === "sending" ? "SENDING TX-204 EVENT" : eventState === "sent" ? "TX-204 EVENT SENT" : "EVENT FAILED"}</span>
         </div>
 
         <div className="teleprompter-layout">
@@ -104,7 +104,7 @@ export default function Teleprompter() {
 
         </div>
       </section>
-      <footer className="teleprompter-footer"><span>Direct URL only · /teleprompter</span><span>At 01:20: automatic TX-204 cooling anomaly injection</span></footer>
+      <footer className="teleprompter-footer"><span>Direct URL only · /teleprompter</span><span>At 02:15: automatic TX-204 cooling anomaly injection</span></footer>
     </main>
   );
 }

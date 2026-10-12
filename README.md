@@ -29,7 +29,7 @@ The four-minute SpeedHacks / SR008 demo follows one idea from abstract platform 
 | `/fleet` | Fleet Agent customer application: live-style telemetry, road-following routes, anomaly explanation, and targeted rerouting. |
 | `/operator` | Private off-stage console for manually injecting or clearing a fleet anomaly. |
 | `/presentation` | Stage Mode: the four-minute narrative and transitions into the Core and Fleet pages. |
-| `/teleprompter` | Direct-only compact two-minute teleprompter with timer, script line, click/do instruction, and automatic TX-204 anomaly injection at 01:20. |
+| `/teleprompter` | Direct-only compact three-minute teleprompter with timer, script line, click/do instruction, and automatic TX-204 anomaly injection at 02:15. |
 
 The teleprompter is intentionally not linked from the public demo surfaces. Keep it pinned at the top of a second screen while recording the main presentation screen.
 
@@ -88,7 +88,7 @@ For a full rehearsal:
 1. Open `/presentation` on the recording display.
 2. Open `/fleet` on the stage display when the narrative reaches Fleet Agent.
 3. Open `/operator` on an off-stage device, or start `/teleprompter` on the second screen.
-4. Start the teleprompter. At `01:20`, it automatically sends the TX-204 cooling anomaly to Fleet Agent.
+4. Start the teleprompter. At `02:15`, it automatically sends the TX-204 cooling anomaly to Fleet Agent.
 
 ## Environment variables
 
