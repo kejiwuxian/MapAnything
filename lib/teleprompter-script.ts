@@ -9,7 +9,7 @@ export type TeleprompterSegment = {
 };
 
 export const TELEPROMPTER_TOTAL_SECONDS = 180;
-export const TELEPROMPTER_EVENT_SECONDS = 135;
+export const TELEPROMPTER_LIVE_EVENT_INDEX = 6;
 
 export const teleprompterScript: TeleprompterSegment[] = [
   {
@@ -72,7 +72,7 @@ export const teleprompterScript: TeleprompterSegment[] = [
     end: 157,
     kicker: "02:15 · LIVE EVENT",
     line: "MapAnything has detected an anomaly on truck TX-204. The mapped evidence points to a cooling-system issue, and the agent proposes a targeted reroute.",
-    instruction: "At 02:15 the teleprompter injects the live event automatically. Wait for the red notification, then show the mapped explanation and workshop route.",
+    instruction: "At 02:15 press PageDown to trigger the live event. Wait for the red notification, then show the mapped explanation and workshop route.",
     accent: "#ff647c",
   },
   {
