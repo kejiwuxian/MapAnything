@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { TELEPROMPTER_LIVE_EVENT_INDEX, TELEPROMPTER_TOTAL_SECONDS, teleprompterScript } from "../lib/teleprompter-script";
+import { sendPresentationCommand } from "../lib/presentation-sync";
 
 function formatClock(seconds: number) {
   const wholeSeconds = Math.max(0, Math.floor(seconds));
@@ -13,6 +14,7 @@ export default function Teleprompter() {
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [eventState, setEventState] = useState<"armed" | "sending" | "sent" | "failed">("armed");
   const [activeIndex, setActiveIndex] = useState(0);
+  const activeIndexRef = useRef(0);
   const eventTriggeredRef = useRef(false);
   const activeSegment = teleprompterScript[activeIndex];
   const progress = Math.min(100, (elapsed / TELEPROMPTER_TOTAL_SECONDS) * 100);
@@ -34,17 +36,24 @@ export default function Teleprompter() {
   };
 
   const advanceCue = () => {
-    const nextIndex = Math.min(teleprompterScript.length - 1, activeIndex + 1);
-    if (nextIndex === activeIndex) return;
+    const currentIndex = activeIndexRef.current;
+    const nextIndex = Math.min(teleprompterScript.length - 1, currentIndex + 1);
+    if (nextIndex === currentIndex) return;
+    activeIndexRef.current = nextIndex;
     const nextStart = teleprompterScript[nextIndex].start;
     setActiveIndex(nextIndex);
     setElapsed(nextStart);
     if (startedAt !== null) setStartedAt(Date.now() - nextStart * 1000);
     if (nextIndex === TELEPROMPTER_LIVE_EVENT_INDEX) triggerAnomaly();
+    if (nextIndex === 1) sendPresentationCommand({ type: "navigate", path: "/?stage=2" });
+    if (nextIndex === 2) sendPresentationCommand({ type: "run-core" });
+    if (nextIndex === 4) sendPresentationCommand({ type: "navigate", path: "/fleet?stage=5" });
+    if (nextIndex === 7) sendPresentationCommand({ type: "navigate", path: "/presentation?slide=7" });
   };
 
   const retreatCue = () => {
-    const previousIndex = Math.max(0, activeIndex - 1);
+    const previousIndex = Math.max(0, activeIndexRef.current - 1);
+    activeIndexRef.current = previousIndex;
     const previousStart = teleprompterScript[previousIndex].start;
     setActiveIndex(previousIndex);
     setElapsed(previousStart);
@@ -85,17 +94,21 @@ export default function Teleprompter() {
     if (elapsed >= TELEPROMPTER_TOTAL_SECONDS) {
       await clearEvent();
       setElapsed(0);
+      activeIndexRef.current = 0;
       setActiveIndex(0);
       eventTriggeredRef.current = false;
       setEventState("armed");
+      sendPresentationCommand({ type: "navigate", path: "/presentation?slide=0" });
       setStartedAt(Date.now());
       return;
     }
     if (elapsed === 0) {
       await clearEvent();
+      activeIndexRef.current = 0;
       setActiveIndex(0);
       eventTriggeredRef.current = false;
       setEventState("armed");
+      sendPresentationCommand({ type: "navigate", path: "/presentation?slide=0" });
     }
     setStartedAt(Date.now() - elapsed * 1000);
   };
@@ -103,9 +116,11 @@ export default function Teleprompter() {
   const reset = async () => {
     setStartedAt(null);
     setElapsed(0);
+    activeIndexRef.current = 0;
     setActiveIndex(0);
     eventTriggeredRef.current = false;
     setEventState("armed");
+    sendPresentationCommand({ type: "navigate", path: "/presentation?slide=0" });
     await clearEvent();
   };
 
@@ -117,7 +132,7 @@ export default function Teleprompter() {
       </header>
 
       <section className="teleprompter-main">
-        <div className="teleprompter-topline"><span>3:00 PRESENTATION SCRIPT · PAGE DOWN NEXT</span><span>{activeIndex + 1} / {teleprompterScript.length}</span></div>
+        <div className="teleprompter-topline"><span>3:00 PRESENTATION SCRIPT · PAGE DOWN DRIVES STAGE</span><span>{activeIndex + 1} / {teleprompterScript.length}</span></div>
         <div className="teleprompter-clock-row">
           <strong>{formatClock(elapsed)}</strong><span>/ {formatClock(TELEPROMPTER_TOTAL_SECONDS)}</span>
           <div className="teleprompter-progress"><i style={{ width: `${progress}%` }} /></div>
@@ -138,7 +153,7 @@ export default function Teleprompter() {
 
         </div>
       </section>
-      <footer className="teleprompter-footer"><span>PageDown next · PageUp previous · direct URL only</span><span>PageDown on LIVE EVENT triggers TX-204 injection</span></footer>
+      <footer className="teleprompter-footer"><span>PageDown next · PageUp previous · sends stage commands</span><span>PageDown on LIVE EVENT triggers TX-204 injection</span></footer>
     </main>
   );
 }

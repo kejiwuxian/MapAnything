@@ -29,7 +29,7 @@ The four-minute SpeedHacks / SR008 demo follows one idea from abstract platform 
 | `/fleet` | Fleet Agent customer application: live-style telemetry, road-following routes, anomaly explanation, and targeted rerouting. |
 | `/operator` | Private off-stage console for manually injecting or clearing a fleet anomaly. |
 | `/presentation` | Stage Mode: the four-minute narrative and transitions into the Core and Fleet pages. |
-| `/teleprompter` | Direct-only compact three-minute teleprompter with timer, PageDown cue control, click/do instruction, and TX-204 anomaly injection when the live-event cue is triggered at 02:15. |
+| `/teleprompter` | Direct-only compact three-minute teleprompter with PageDown cue control, cross-tab stage navigation, click/do instruction, and TX-204 anomaly injection when the live-event cue is triggered at 02:15. |
 
 The teleprompter is intentionally not linked from the public demo surfaces. Keep it pinned at the top of a second screen while recording the main presentation screen.
 
@@ -86,9 +86,9 @@ Then open `http://localhost:3000/`.
 For a full rehearsal:
 
 1. Open `/presentation` on the recording display.
-2. Open `/fleet` on the stage display when the narrative reaches Fleet Agent.
-3. Open `/operator` on an off-stage device, or start `/teleprompter` on the second screen.
-4. Start the teleprompter and use PageDown to advance cues. On the `02:15` live-event cue, PageDown sends the TX-204 cooling anomaly to Fleet Agent.
+2. Open `/teleprompter` on the second screen. The main tab will be driven automatically across Stage, Core, and Fleet.
+3. Optionally open `/operator` on an off-stage device for manual event control.
+4. Start the teleprompter and use PageDown to advance cues. It sends stage navigation commands to the main tab, runs Core at the mapping cue, opens Fleet at the customer cue, and sends the TX-204 cooling anomaly on the `02:15` live-event cue.
 
 ## Environment variables
 

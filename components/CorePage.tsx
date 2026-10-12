@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useEffect } from "react";
 import ClusterCanvas from "./ClusterCanvas";
 import { kitRadarDataset } from "../lib/kit-radar-data";
 import { clusterKitRadarLogs } from "../lib/cluster-model";
 import { mappings, reportClusters, telemetryClusters } from "../lib/demo-data";
+import { listenForPresentationCommands } from "../lib/presentation-sync";
 
 function CoreHeader() {
   const queryValue = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("stage");
@@ -42,6 +44,10 @@ export default function CorePage() {
       setElapsedSeconds(Number(((performance.now() - startedAt) / 1000).toFixed(1)));
     }, 1200);
   };
+
+  useEffect(() => listenForPresentationCommands((command) => {
+    if (command.type === "run-core") runMapping();
+  }), []);
 
   const measuredTime = complete && elapsedSeconds !== null ? elapsedSeconds.toFixed(1) : "—";
   const displayCount = kitRadarDataset.readingCount.toLocaleString();
